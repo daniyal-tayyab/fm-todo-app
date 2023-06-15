@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 import { useAppDispatch } from "../../app/hooks";
 
@@ -43,6 +43,10 @@ const Home = () => {
   const todos = useSelector((state) => state.todos.value);
   const theme = useSelector((state) => state.theme.value);
 
+  const dragItem = useRef();
+  const dragOverItem = useRef();
+  const inputRef = useRef();
+
   const [todo, setTodo] = useState("");
   const [copyTodos, setCopyTodos] = useState(todos);
 
@@ -51,6 +55,26 @@ const Home = () => {
   const [completed, setCompleted] = useState(false);
 
   const dispatch = useAppDispatch();
+
+  const handleDragStart = (e, position) => {
+    dragItem.current = position;
+    console.log(position + 1);
+  };
+
+  const handleDragEnter = (e, position) => {
+    dragOverItem.current = position;
+    console.log(position + 1);
+  };
+
+  const handleDropItem = () => {
+    const copyTodosList = [...todos];
+    const dragItemContent = copyTodosList[dragItem.current];
+    copyTodosList.splice(dragItem.current, 1);
+    copyTodosList.splice(dragOverItem.current, 0, dragItemContent);
+    dragItem.current = null;
+    dragOverItem.current = null;
+    setCopyTodos(copyTodosList);
+  };
 
   const handleThemeToggle = () => {
     dispatch(toggle());
@@ -63,6 +87,7 @@ const Home = () => {
     id++;
     setCopyTodos([...copyTodos, { id, todo, isCompleted: false }]);
     dispatch(addTodo({ id, todo, isCompleted: false }));
+    setTodo("");
   };
 
   const handleCheckboxChange = (id) => {
@@ -137,6 +162,7 @@ const Home = () => {
               placeholder="Create a new todo..."
               name="todo"
               onChange={(e) => handleInput(e)}
+              value={todo}
             />
           </Form>
         </InputContainer>
@@ -145,10 +171,14 @@ const Home = () => {
             <Todo
               thememode={theme}
               key={index}
+              index={index}
               todoItem={todoItem}
               handleChange={handleCheckboxChange}
               handleDelete={handleDelete}
               active={todoItem.isCompleted}
+              dragStart={handleDragStart}
+              dragEnter={handleDragEnter}
+              dropItem={handleDropItem}
             />
           ))}
           <StatusBar thememode={theme}>

@@ -11,6 +11,7 @@ export const TodoContainer = styled("li")((props) => ({
       ? props.theme.veryDarkGrayishBlue
       : props.theme.lightGrayishBlue
   }`,
+  cursor: "grab",
 }));
 
 export const TodoText = styled("p")((props) => ({
